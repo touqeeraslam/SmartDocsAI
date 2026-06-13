@@ -1,6 +1,10 @@
 # Deploying SmartDocsAI
 
-Backend (FastAPI + ChromaDB) → **Render** · Frontend (Next.js) → **Vercel**.
+Backend (FastAPI + ChromaDB) → **Hugging Face Spaces** (free, no card) ·
+Frontend (Next.js) → **Vercel**.
+
+> A `render.yaml` is also included if you ever want to deploy the backend on
+> Render instead (Render requires a card to verify the account, even on free).
 
 ---
 
@@ -30,26 +34,42 @@ commit with no secrets.)
 
 ---
 
-## 2. Deploy the backend on Render
+## 2. Deploy the backend on Hugging Face Spaces
 
-1. Go to https://dashboard.render.com → **New** → **Blueprint**.
-2. Connect your GitHub and pick the **SmartDocsAI** repo. Render reads
-   [`render.yaml`](./render.yaml) and proposes the `smartdocsai-api` service.
-3. Click **Apply**. When prompted, fill in the secret env vars:
-   | Variable | Value |
+The backend lives in the [`backend/`](./backend) folder. A Space is its own git
+repo, so we create a Space and push the **contents of `backend/`** to it (the
+`Dockerfile` + `README.md` header tell HF to build the Docker image).
+
+1. Create a free account at https://huggingface.co (no card required).
+2. **New → Space.** Name it e.g. `smartdocsai-api`, **SDK: Docker**,
+   visibility **Public**, hardware **CPU basic (free)**. Create.
+3. Add your secrets: Space → **Settings → Variables and secrets → New secret**:
+   | Secret | Value |
    |---|---|
    | `AZURE_OPENAI_ENDPOINT` | `https://<your-resource>.openai.azure.com/` |
    | `AZURE_OPENAI_KEY` | the **new** key from step 0 |
-   | `ADMIN_TOKEN` | a long random string (this is your admin panel password) |
+   | `ADMIN_TOKEN` | a long random string (your admin-panel password) |
    | `CORS_ORIGINS` | leave as `*` for now; tighten in step 4 |
-4. Wait for the build. When live you'll get a URL like
-   `https://smartdocsai-api.onrender.com`. Open `/health` — it should return
+4. Push the backend to the Space. Create a [write token](https://huggingface.co/settings/tokens),
+   then from the project root:
+   ```bash
+   cd backend
+   git init -b main
+   git add -A
+   git commit -m "SmartDocsAI backend"
+   git remote add space https://<HF_USERNAME>:<HF_TOKEN>@huggingface.co/spaces/<HF_USERNAME>/smartdocsai-api
+   git push space main
+   ```
+   (Or use the Space's web UI to upload the `backend/` files.)
+5. The Space builds the Docker image automatically. When the status is
+   **Running**, your API is at `https://<HF_USERNAME>-smartdocsai-api.hf.space`.
+   Open `/health` — it should return
    `{"status":"ok","llm_configured":true,"admin_configured":true}`.
 
-> **Free tier note:** the instance sleeps after inactivity and its disk is wiped
-> on cold start. The demo document re-seeds automatically, but admin-uploaded
-> PDFs do **not** survive a restart. For persistent uploads, upgrade the plan and
-> add a Render Disk mounted at `/app/storage`, or switch the host to Fly.io.
+> **Free Space note:** storage is ephemeral and the Space sleeps after
+> inactivity. The demo document re-seeds automatically on each start, but
+> admin-uploaded PDFs do **not** survive a restart. For persistence, add HF
+> persistent storage (paid) or deploy on a host with a volume (e.g. Fly.io).
 
 ---
 
@@ -60,18 +80,18 @@ commit with no secrets.)
 3. Add an environment variable:
    | Variable | Value |
    |---|---|
-   | `NEXT_PUBLIC_API_BASE` | your Render URL, e.g. `https://smartdocsai-api.onrender.com` |
+   | `NEXT_PUBLIC_API_BASE` | your Space URL, e.g. `https://<HF_USERNAME>-smartdocsai-api.hf.space` |
 4. **Deploy.** You'll get a URL like `https://smart-docs-ai.vercel.app`.
 
 ---
 
 ## 4. Lock CORS to your frontend
 
-1. Back in Render → `smartdocsai-api` → **Environment**, set:
+1. Back in the Space → **Settings → Variables and secrets**, edit `CORS_ORIGINS`:
    ```
    CORS_ORIGINS=https://smart-docs-ai.vercel.app
    ```
-   (use your real Vercel domain). Save → the service redeploys.
+   (use your real Vercel domain). Save → the Space restarts.
 2. Reload the Vercel site. The chat should answer questions, and `/admin`
    should unlock with your `ADMIN_TOKEN`.
 
