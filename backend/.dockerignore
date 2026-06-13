@@ -1,0 +1,8 @@
+aiDocvenv/
+taqienv/
+**/__pycache__/
+*.pyc
+.env
+storage/
+generate.py
+app/routes/admin-s3.py

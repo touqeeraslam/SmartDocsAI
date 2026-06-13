@@ -1,0 +1,21 @@
+# ---- Python ----
+backend/aiDocvenv/
+backend/taqienv/
+**/__pycache__/
+*.py[cod]
+backend/.env
+
+# Runtime storage (uploaded PDFs + vector DB)
+backend/storage/
+storage/
+
+# ---- Node / Next.js ----
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# ---- Misc ----
+.DS_Store
+*.log
+.env

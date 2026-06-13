@@ -1,0 +1,36 @@
+# Render Blueprint for the SmartDocsAI backend (FastAPI + ChromaDB).
+# Render reads this file when you create a "Blueprint" from the repo.
+# The frontend (Next.js) is deployed separately on Vercel.
+#
+# After the service is created, set the secret env vars (marked sync: false)
+# in the Render dashboard: AZURE_OPENAI_KEY, AZURE_OPENAI_ENDPOINT, ADMIN_TOKEN,
+# and CORS_ORIGINS (your Vercel URL).
+services:
+  - type: web
+    name: smartdocsai-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false
+      - key: AZURE_OPENAI_KEY
+        sync: false
+      - key: AZURE_OPENAI_API_VERSION
+        value: 2024-02-15-preview
+      - key: AZURE_EMBEDDING_DEPLOYMENT
+        value: embeddings
+      - key: AZURE_CHAT_DEPLOYMENT
+        value: chat-gpt40
+      - key: ADMIN_TOKEN
+        sync: false
+      # Set to your Vercel URL in production, e.g. https://smart-docs-ai.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+      - key: STORAGE_DIR
+        value: /app/storage
+      - key: SEED_DEMO
+        value: "true"
