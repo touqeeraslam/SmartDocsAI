@@ -41,8 +41,9 @@ repo, so we create a Space and push the **contents of `backend/`** to it (the
 `Dockerfile` + `README.md` header tell HF to build the Docker image).
 
 1. Create a free account at https://huggingface.co (no card required).
-2. **New → Space.** Name it e.g. `smartdocsai-api`, **SDK: Docker**,
+2. **New → Space.** Name it `smartdocsai-api`, **SDK: Docker**,
    visibility **Public**, hardware **CPU basic (free)**. Create.
+   (Space created: `touqeeraslamofficial/smartdocsai-api`.)
 3. Add your secrets: Space → **Settings → Variables and secrets → New secret**:
    | Secret | Value |
    |---|---|
@@ -50,19 +51,25 @@ repo, so we create a Space and push the **contents of `backend/`** to it (the
    | `AZURE_OPENAI_KEY` | the **new** key from step 0 |
    | `ADMIN_TOKEN` | a long random string (your admin-panel password) |
    | `CORS_ORIGINS` | leave as `*` for now; tighten in step 4 |
-4. Push the backend to the Space. Create a [write token](https://huggingface.co/settings/tokens),
-   then from the project root:
+4. Push the backend into the Space's git repo. Create an HF
+   [write token](https://huggingface.co/settings/tokens), then from the project root:
    ```bash
-   cd backend
-   git init -b main
+   # Clone the (currently default) Space repo next to the project
+   git clone https://huggingface.co/spaces/touqeeraslamofficial/smartdocsai-api hf-space
+
+   # Copy the backend into it, replacing HF's starter files
+   cp -r backend/app backend/Dockerfile backend/README.md \
+         backend/requirements.txt backend/.dockerignore hf-space/
+   rm -f hf-space/app.py                # remove HF's starter app
+
+   cd hf-space
    git add -A
-   git commit -m "SmartDocsAI backend"
-   git remote add space https://<HF_USERNAME>:<HF_TOKEN>@huggingface.co/spaces/<HF_USERNAME>/smartdocsai-api
-   git push space main
+   git commit -m "Deploy SmartDocsAI backend"
+   git push      # username: touqeeraslamofficial · password: your HF write token
    ```
-   (Or use the Space's web UI to upload the `backend/` files.)
-5. The Space builds the Docker image automatically. When the status is
-   **Running**, your API is at `https://<HF_USERNAME>-smartdocsai-api.hf.space`.
+5. The Space rebuilds the Docker image automatically. When the status is
+   **Running**, your API is at
+   `https://touqeeraslamofficial-smartdocsai-api.hf.space`.
    Open `/health` — it should return
    `{"status":"ok","llm_configured":true,"admin_configured":true}`.
 
@@ -80,7 +87,7 @@ repo, so we create a Space and push the **contents of `backend/`** to it (the
 3. Add an environment variable:
    | Variable | Value |
    |---|---|
-   | `NEXT_PUBLIC_API_BASE` | your Space URL, e.g. `https://<HF_USERNAME>-smartdocsai-api.hf.space` |
+   | `NEXT_PUBLIC_API_BASE` | your Space URL: `https://touqeeraslamofficial-smartdocsai-api.hf.space` |
 4. **Deploy.** You'll get a URL like `https://smart-docs-ai.vercel.app`.
 
 ---
