@@ -5,6 +5,7 @@ import Sidebar from '../../components/Chat/Sidebar'
 import ChatHeader from '../../components/Chat/ChatHeader'
 import MessageBubble from '../../components/Chat/MessageBubble'
 import ChatInput from '../../components/Chat/ChatInput'
+import { SparkleIcon } from '../../components/Chat/icons'
 import { queryDocument, listDocuments, Source, DocumentRow } from '@/lib/api'
 
 type Message = {
@@ -77,8 +78,14 @@ export default function ChatPage() {
     }
   }
 
+  const suggestions = [
+    'What is the vacation policy?',
+    'Summarize the key points.',
+    'What are the main requirements?'
+  ]
+
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="flex h-screen overflow-hidden bg-slate-100">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -89,27 +96,46 @@ export default function ChatPage() {
         documents={docs}
       />
 
-      <div className="flex-1 flex flex-col">
-        <ChatHeader onToggleSidebar={() => setSidebarOpen((s) => !s)} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <ChatHeader onToggleSidebar={() => setSidebarOpen((s) => !s)} online={!backendOffline} />
 
-        <main className="flex-1 overflow-hidden p-4">
-          <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] bg-white rounded-lg shadow flex flex-col">
-            {backendOffline && (
-              <div className="m-4 mb-0 rounded-md bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-800">
+        <main className="flex flex-1 flex-col overflow-hidden">
+          {backendOffline && (
+            <div className="mx-auto mt-4 w-full max-w-4xl px-4 sm:px-6">
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 Couldn’t reach the backend. Make sure the API is running and{' '}
-                <code className="font-mono">NEXT_PUBLIC_API_BASE</code> points to it.
+                <code className="font-mono text-amber-900">NEXT_PUBLIC_API_BASE</code> points to it.
               </div>
-            )}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+            </div>
+          )}
+
+          <div ref={scrollRef} className="scroll-area flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-4xl space-y-5 px-4 py-6 sm:px-6">
               {messages.length === 0 && (
-                <div className="text-center text-slate-400 mt-12">
-                  <p>Ask a question about the documents.</p>
-                  {docs.length > 0 && (
-                    <p className="text-xs mt-2">
-                      {docs.length} document{docs.length > 1 ? 's' : ''} available — try “What
-                      is the vacation policy?”
-                    </p>
-                  )}
+                <div className="mx-auto mt-8 max-w-lg text-center sm:mt-16">
+                  <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-panel">
+                    <SparkleIcon className="h-7 w-7" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Ask anything about your documents
+                  </h2>
+                  <p className="mt-1.5 text-sm text-slate-500">
+                    {docs.length > 0
+                      ? `${docs.length} document${docs.length > 1 ? 's' : ''} indexed and ready to search.`
+                      : 'Answers are grounded in your knowledge base with page-level citations.'}
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap justify-center gap-2">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => send(s)}
+                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-soft transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -118,11 +144,11 @@ export default function ChatPage() {
               ))}
 
               {loading && (
-                <div className="flex items-start justify-start animate-fade-in-up">
-                  <div className="mr-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">🤖</div>
+                <div className="flex animate-fade-in-up items-start gap-3">
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-soft">
+                    <SparkleIcon className="h-4 w-4" />
                   </div>
-                  <div className="bg-slate-100 rounded-lg rounded-bl-none p-4 shadow-sm flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-4 shadow-soft">
                     <span className="typing-dot" />
                     <span className="typing-dot" />
                     <span className="typing-dot" />
@@ -130,8 +156,10 @@ export default function ChatPage() {
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="border-t p-4">
+          <div className="border-t border-slate-200 bg-slate-100/80 backdrop-blur-md">
+            <div className="mx-auto w-full max-w-4xl px-4 py-4 sm:px-6">
               <ChatInput
                 value={input}
                 onChange={(v: string) => setInput(v)}
@@ -139,6 +167,9 @@ export default function ChatPage() {
                 loading={loading}
                 onQuickSend={(t: string) => send(t)}
               />
+              <p className="mt-2 text-center text-xs text-slate-400">
+                Press Enter to send · Shift+Enter for a new line
+              </p>
             </div>
           </div>
         </main>

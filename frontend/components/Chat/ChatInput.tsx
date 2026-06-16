@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react'
+import { SendIcon } from './icons'
 
 type Props = {
   value: string
@@ -8,11 +9,10 @@ type Props = {
   loading?: boolean
 }
 
-export default function ChatInput({ value, onChange, onSend, onQuickSend, loading = false }: Props) {
+export default function ChatInput({ value, onChange, onSend, loading = false }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
-    // auto-resize
     const el = textareaRef.current
     if (!el) return
     el.style.height = '0px'
@@ -26,36 +26,38 @@ export default function ChatInput({ value, onChange, onSend, onQuickSend, loadin
     }
   }
 
+  const canSend = value.trim().length > 0 && !loading
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-soft transition focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100">
       <textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ask anything about your documents... (Shift+Enter for newline)"
-        className="flex-1 min-h-[44px] max-h-48 resize-none px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+        rows={1}
+        placeholder="Ask anything about your documents…"
+        className="max-h-48 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
       />
 
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => !loading && onSend()}
-          disabled={loading}
-          className={`p-3 rounded-full text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-200 transition ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
-          title="Send"
-        >
-          {loading ? (
-            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-45" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          )}
-        </button>
-      </div>
+      <button
+        onClick={() => canSend && onSend()}
+        disabled={!canSend}
+        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-white transition focus:outline-none focus:ring-2 focus:ring-brand-300 ${
+          canSend ? 'bg-brand-600 hover:bg-brand-700' : 'cursor-not-allowed bg-slate-300'
+        }`}
+        title="Send"
+        aria-label="Send message"
+      >
+        {loading ? (
+          <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+        ) : (
+          <SendIcon className="h-5 w-5" />
+        )}
+      </button>
     </div>
   )
 }

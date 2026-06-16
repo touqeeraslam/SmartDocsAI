@@ -1,4 +1,5 @@
 import React from 'react'
+import { SparkleIcon, UserIcon } from './icons'
 
 type Source = { title: string; page: number; score: number }
 type Message = {
@@ -10,28 +11,41 @@ type Message = {
 
 export default function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === 'user'
+
   return (
-    <div className={`flex items-start ${isUser ? 'justify-end' : 'justify-start'}`}>
-      {!isUser && (
-        <div className="mr-3">
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">🤖</div>
-        </div>
-      )}
+    <div className={`flex animate-fade-in-up items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
+      <div
+        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full shadow-soft ${
+          isUser
+            ? 'bg-slate-700 text-white'
+            : 'bg-gradient-to-br from-brand-500 to-brand-700 text-white'
+        }`}
+      >
+        {isUser ? <UserIcon className="h-4 w-4" /> : <SparkleIcon className="h-4 w-4" />}
+      </div>
 
       <div
-        className={`max-w-[80%] p-3 rounded-lg shadow-sm animate-fade-in-up
-          ${isUser ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-100 text-slate-900 rounded-bl-none'}`}
+        className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-soft ${
+          isUser
+            ? 'rounded-tr-md bg-brand-600 text-white'
+            : 'rounded-tl-md border border-slate-200 bg-white text-slate-800'
+        }`}
       >
         <div className="whitespace-pre-wrap">{message.text}</div>
 
         {!isUser && message.sources && message.sources.length > 0 && (
-          <div className="mt-3 pt-2 border-t border-slate-200">
-            <div className="text-xs font-medium text-slate-500 mb-1">Sources</div>
-            <ul className="space-y-1">
+          <div className="mt-3 border-t border-slate-100 pt-2.5">
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Sources
+            </div>
+            <ul className="flex flex-wrap gap-1.5">
               {message.sources.map((s, i) => (
-                <li key={i} className="text-xs text-slate-600 flex items-center gap-2">
-                  <span className="inline-block w-4 text-slate-400">{i + 1}.</span>
-                  <span className="font-medium">{s.title}</span>
+                <li
+                  key={i}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600"
+                  title={`Relevance ${(s.score * 100).toFixed(0)}%`}
+                >
+                  <span className="font-medium text-slate-700">{s.title}</span>
                   <span className="text-slate-400">p.{s.page}</span>
                 </li>
               ))}
@@ -39,12 +53,6 @@ export default function MessageBubble({ message }: { message: Message }) {
           </div>
         )}
       </div>
-
-      {isUser && (
-        <div className="ml-3">
-          <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">Y</div>
-        </div>
-      )}
     </div>
   )
 }

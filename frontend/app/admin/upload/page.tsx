@@ -49,37 +49,37 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl">
-      <h2 className="text-xl font-semibold mb-1">Upload & Ingest</h2>
-      <p className="text-sm text-slate-500 mb-6">
+      <h2 className="mb-1 text-xl font-semibold text-slate-900">Upload & Ingest</h2>
+      <p className="mb-6 text-sm text-slate-500">
         Pick a PDF — the server uploads, extracts text, chunks it, generates
         embeddings, and stores them in the vector database in one step.
       </p>
 
-      <form onSubmit={onSubmit} className="space-y-4 bg-white rounded-xl shadow p-6">
+      <form onSubmit={onSubmit} className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-soft">
         <div>
-          <label className="block text-sm mb-1 font-medium">Title</label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Title</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Q4 Financial Report"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm transition focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
         </div>
 
         <div>
-          <label className="block text-sm mb-1 font-medium">PDF file</label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">PDF file</label>
           <input
             type="file"
             accept="application/pdf"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:font-medium file:text-brand-700 hover:file:bg-brand-100"
           />
         </div>
 
         <button
           type="submit"
           disabled={!file || !title.trim() || status === 'uploading' || status === 'processing'}
-          className="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
+          className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === 'uploading'
             ? `Uploading… ${progress}%`
@@ -89,26 +89,24 @@ export default function UploadPage() {
         </button>
 
         {(status === 'uploading' || status === 'processing') && (
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div
-              className="bg-indigo-500 h-2 transition-all"
+              className="h-2 rounded-full bg-brand-500 transition-all"
               style={{ width: `${status === 'processing' ? 100 : progress}%` }}
             />
           </div>
         )}
 
         {message && (
-          <div
-            className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-green-600'}`}
-          >
+          <div className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-emerald-600'}`}>
             {message}
           </div>
         )}
 
         {result && (
-          <div className="text-sm text-slate-600 border-t pt-3">
-            <div><span className="font-medium">{result.title}</span></div>
-            <div>{result.pages} pages • {result.chunks} chunks embedded</div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="font-medium text-slate-800">{result.title}</div>
+            <div>{result.pages} pages · {result.chunks} chunks embedded</div>
           </div>
         )}
       </form>
